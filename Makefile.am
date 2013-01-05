@@ -2,5 +2,5 @@ ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -D_FORTIFY_SOURCE=0 $(LIBMCRYPT_CFLAGS)
 AM_LDFLAGS =  $(EXTRA_LDFLAGS) $(LIBMCRYPT_LDFLAGS)
 bin_PROGRAMS = ruuveal
-ruuveal_SOURCES = main.c
+ruuveal_SOURCES = main.c htcaes.c htckey.c
 ruuveal_LDADD = $(LIBMCRYPT_LIBS)
