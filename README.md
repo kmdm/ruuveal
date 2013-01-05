@@ -1,11 +1,12 @@
 ruuveal ALPHA
 =============
 
-ruuveal decrypts encrypted RUUs (zip) files released by HTC.
+ruuveal decrypts the encrypted zip files contained in RUUs released by HTC.
 
 It is currently an ALPHA version, meaning it probably has bugs or will cause the end of the world as we know it. You have been warned. 
 
 You will need to extract the zip file from the RUU executable before you can use this tool - use Google, there are a few methods.
+Example: http://mobility.forumsee.com/a/m/s/p12-9522-076282--extract-the-rom-from-htc-ruu.html
 
 Usage
 -----
@@ -26,6 +27,13 @@ Please report any bugs/issues you find - Thanks!
 Credits
 -------
 
-* joeykrim - Making me aware HTC have released an encrypted RUU.
-* RaYmAn   - Being a sounding board / working through some weird logic.
+* joeykrim - Making me aware HTC has released an encrypted RUU.
+* RaYmAn   - Being a sounding board / working through some unusual logic.
 * HTC      - For continuing to release great devices.
+ 
+Compile
+-------
+
+sudo apt-get install libmcrypt-dev (if not done previously sh autogen.sh will throw "`AM_PATH_LIBMCRYPT' not found")
+sh autogen.sh
+./configure ; make
