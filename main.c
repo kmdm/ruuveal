@@ -61,20 +61,29 @@ static void dump(const char *label, const unsigned char *data, int len)
 
 int usage(const char **argv)
 {
+    int i;
     printf("usage:-\n\n");
-    printf("%s device <encrypted.zip> <decrypted.zip>\n\n", argv[0]);
+    printf("%s <device> <encrypted.zip> <decrypted.zip>\n\n", argv[0]);
+    
+    /* FIXME: Generate this list automatically. */
+    printf("supported devices:-\n\n");
+    printf("evita\t\t- HTC One X (S4)\n");    
+    printf("fireball\t- HTC Incredible 4G\n");
+    printf("jewel\t\t- HTC EVO 4G LTE)\n");
+    printf("ville\t\t- HTC One S\n\n");
+
     return -1;
 }
 
-int progress_update(unsigned int pos, unsigned int size) 
+void progress_update(unsigned int pos, unsigned int size) 
 {
     printf("Decrypting RUU... %d/%d\r", pos, size);
 }
 
 int main(int argc, const char **argv)
 {
-    char key[16] = {0};
-    char iv[16] = {0};
+    char key[HTC_AES_KEYSIZE] = {0};
+    char iv[HTC_AES_KEYSIZE] = {0};
     int rc = 0;
 
     unsigned short keymap_index = 0;
@@ -86,6 +95,10 @@ int main(int argc, const char **argv)
         return usage(argv);
     }
     
+    printf("ruuveal - ALPHA BUILD\n");
+    printf("A HTC RUU decrypter\n");
+    printf("---------------------\n\n");
+
     /* Open the encrypted.zip file. */
     if((in = fopen(argv[2], "rb")) == NULL) {
         perror("failed to open encrypted zip");
@@ -135,7 +148,7 @@ int main(int argc, const char **argv)
         FAIL(-7) 
     }
 
-    printf("Decrypted RUU (rom.zip) written to: %s\n", argv[3]);
+    printf("Decrypted RUU (zip) written to: %s\n", argv[3]);
 
 end:
     if(in) fclose(in);
