@@ -7,6 +7,10 @@ It is currently an ALPHA version, meaning it probably has bugs or will cause the
 
 You will need to extract the zip file from the RUU executable before you can use this tool - use Google, there are a few methods.
 
+One such method is unruu, available from:-
+
+ * https://github.com/kmdm/unruu
+
 Compilation
 -----------
 
