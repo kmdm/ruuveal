@@ -27,7 +27,7 @@ static int get_keydata_offset(const char *device)
 {
     int i;
 
-    for(i = 0; i < sizeof(htc_devices); i++) {
+    for(i = 0; i < htc_devices_len; i++) {
         if(!strcmp(htc_devices[i].name, device)) {
             return htc_devices[i].keydata_offset;
         }
@@ -41,7 +41,6 @@ int htc_generate_aes_keys(const char *device, int keymap_offset, char *aeskey,
 {
     char *keymap, *keydata;
     int i, offset;
-    
 
     if((offset = get_keydata_offset(device)) == -1) {
         return 0;

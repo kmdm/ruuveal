@@ -79,6 +79,7 @@ int usage(const char **argv)
     
     /* FIXME: Generate this list automatically. */
     printf("supported devices:-\n\n");
+    printf("endeavor_u\t- HTC One X\n");
     printf("evita\t\t- HTC One X (S4)\n");    
     printf("fireball\t- HTC Incredible 4G\n");
     printf("jewel\t\t- HTC EVO 4G LTE)\n");
