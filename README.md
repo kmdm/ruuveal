@@ -20,6 +20,15 @@ Once you have these files you can compile the development tree as follows:-
 
 Please note that once release tarballs area made the autogen.sh step will not be required since release tarballs ship with the configure script and the Makefile already generated.
 
+Downloads
+---------
+
+Downloads are currently available from:-
+
+* http://psi.kennynet.co.uk/ruuveal/
+
+Please note that only snapshots are available at present but these will allow you to skip the autogen.sh step above and just run configure and make. 
+
 Usage
 -----
 
