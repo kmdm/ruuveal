@@ -26,10 +26,11 @@
 static int get_keydata_offset(const char *device)
 {
     int i;
+    htc_device_t *ptr;
 
-    for(i = 0; i < htc_devices_len; i++) {
-        if(!strcmp(htc_devices[i].name, device)) {
-            return htc_devices[i].keydata_offset;
+    for(ptr = htc_get_devices(); *ptr->name; ptr++) {
+        if(!strcmp(ptr->name, device)) {
+            return ptr->keydata_offset;
         }
     }
 

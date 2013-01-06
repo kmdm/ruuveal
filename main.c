@@ -25,6 +25,8 @@
 #include "htcaes.h"
 #include "htckey.h"
 
+#include "htc/devices.h"
+
 #ifdef DEBUG_ENABLED
 #define DEBUG(x) x
 #else
@@ -74,17 +76,16 @@ static void dump(const char *label, const unsigned char *data, int len)
 int usage(const char **argv)
 {
     int i;
+    htc_device_t *ptr;
+
     printf("usage:-\n\n");
     printf("%s <device> <encrypted.zip> <decrypted.zip>\n\n", argv[0]);
     
-    /* FIXME: Generate this list automatically. */
     printf("supported devices:-\n\n");
-    printf("endeavor_u\t- HTC One X\n");
-    printf("evita\t\t- HTC One X (S4)\n");    
-    printf("fireball\t- HTC Incredible 4G\n");
-    printf("jewel\t\t- HTC EVO 4G LTE)\n");
-    printf("ville\t\t- HTC One S\n\n");
-
+    for(ptr = htc_get_devices(); *ptr->name; ptr++) {
+        printf("* %s (%s)\n", ptr->desc, ptr->name);
+    }
+    printf("\n");
     return -1;
 }
 

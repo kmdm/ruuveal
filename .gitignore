@@ -14,5 +14,7 @@ install-sh
 libtool
 ltmain.sh
 missing
+ruuveal
+ruuveal-ALPHA*tar.gz
 *.o
 *.sw?
