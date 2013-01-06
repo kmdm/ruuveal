@@ -11,6 +11,19 @@ One such method is unruu, available from:-
 
  * https://github.com/kmdm/unruu
 
+Supported Devices
+-----------------
+
+The following devices are currently supported by ruuveal:-
+
+ * endeavor\_u - HTC One X (T3)
+ * evita - HTC One X (S4)
+ * fireball - HTC Incredible 4G
+ * jewel - HTC EVO 4G LTE
+ * ville - HTC One S
+
+If your device is not supported and you would like it supported please open an issue in the tracker with the device name, codename and a link to the most recent hboot file for the device. (Not a link to the full RUU!)
+
 Compilation
 -----------
 
