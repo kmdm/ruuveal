@@ -6,10 +6,11 @@ htc_device_t htc_devices[] = {
     { "endeavor_u", "HTC One X (T3)", 1 },
     { "era_u", "HTC One X+", 2 },
     { "evita", "HTC One X (S4)", 3 },
-    { "fireball", "HTC Incredible 4G LTE", 4 },
-    { "jel_dd", "HTC X720", 5 },
-    { "jewel", "HTC Evo 4G LTE", 6 },
-    { "ville", "HTC One S", 7 },
+    { "evitare", "HTC One X+ LTE", 4 },
+    { "fireball", "HTC Incredible 4G LTE", 5 },
+    { "jel_dd", "HTC X720", 6 },
+    { "jewel", "HTC Evo 4G LTE", 7 },
+    { "ville", "HTC One S", 8 },
     { 0, 0, 0 }
 };
 
