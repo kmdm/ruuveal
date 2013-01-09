@@ -1,9 +1,9 @@
-ruuveal ALPHA
-=============
+ruuveal
+=======
 
 ruuveal decrypts encrypted zip files contained in RUUs released by HTC.
 
-It is currently an ALPHA version, meaning it probably has bugs or will cause the end of the world as we know it. You have been warned. 
+ruuveal has been (somewhat) tested but that doesn't mean it won't cause the end of the world as we know it. You have been warned. 
 
 You will need to extract the zip file from the RUU executable before you can use this tool - use Google, there are a few methods.
 

@@ -1,5 +1,5 @@
 AC_CONFIG_MACRO_DIR([m4])
-AC_INIT([ruuveal],[ALPHA])
+AC_INIT([ruuveal],[0.1])
 AM_INIT_AUTOMAKE([1.10 no-define foreign])
 AC_PROG_LIBTOOL
 AC_PROG_CC

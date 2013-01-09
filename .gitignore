@@ -1,6 +1,8 @@
 .deps/
 autom4te.cache/
 m4/
+tests/*.zip
+tests/tmp*
 Makefile
 Makefile.in
 aclocal.m4
@@ -15,6 +17,6 @@ libtool
 ltmain.sh
 missing
 ruuveal
-ruuveal-ALPHA*tar.gz
+ruuveal*tar.gz
 *.o
 *.sw?
