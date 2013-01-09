@@ -18,12 +18,16 @@ The following devices are currently supported by ruuveal:-
 
 * HTC One XT (endeavor\_td)
 * HTC One X (T3) (endeavor\_u)
-* HTC One X+ (era\_u)
+* HTC One X+ (enrc2\_u)
+* HTC One X+ (enrc2b\_u)
 * HTC One X (S4) (evita)
+* HTC One X+ LTE (evitare\_ul)
 * HTC Incredible 4G LTE (fireball)
 * HTC X720 (jel\_dd)
 * HTC Evo 4G LTE (jewel)
+* HTC Droid DNA (monarudo)
 * HTC One S (ville)
+
 
 If your device is not supported and you would like it supported please open an issue in the tracker with the device name, codename and a link to the most recent hboot file for the device. (Not a link to the full RUU!)
 
