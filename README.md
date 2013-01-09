@@ -51,8 +51,6 @@ Downloads are currently available from:-
 
 * http://psi.kennynet.co.uk/ruuveal/
 
-Please note that only snapshots are available at present but these will allow you to skip the autogen.sh step above and just run configure and make. 
-
 Usage
 -----
 
