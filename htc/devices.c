@@ -4,13 +4,15 @@
 htc_device_t htc_devices[] = {
     { "endeavor_td", "HTC One XT", 0 },
     { "endeavor_u", "HTC One X (T3)", 1 },
-    { "era_u", "HTC One X+", 2 },
-    { "evita", "HTC One X (S4)", 3 },
-    { "evitare", "HTC One X+ LTE", 4 },
-    { "fireball", "HTC Incredible 4G LTE", 5 },
-    { "jel_dd", "HTC X720", 6 },
-    { "jewel", "HTC Evo 4G LTE", 7 },
-    { "ville", "HTC One S", 8 },
+    { "enrc2_u", "HTC One X+", 2 },
+    { "enrc2b_u", "HTC One X+", 3 },
+    { "evita", "HTC One X (S4)", 4 },
+    { "evitare_ul", "HTC One X+ LTE", 5 },
+    { "fireball", "HTC Incredible 4G LTE", 6 },
+    { "jel_dd", "HTC X720", 7 },
+    { "jewel", "HTC Evo 4G LTE", 8 },
+    { "monarudo", "HTC Droid DNA", 9 },
+    { "ville", "HTC One S", 10 },
     { 0, 0, 0 }
 };
 
