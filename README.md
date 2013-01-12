@@ -24,7 +24,7 @@ The following devices are currently supported by ruuveal:-
 * HTC One X (S4) (evita)
 * HTC One X+ LTE (evitare\_ul)
 * HTC Incredible 4G LTE (fireball)
-* HTC X720 (jel\_dd)
+* HTC One XC (jel\_dd)
 * HTC Evo 4G LTE (jewel)
 * HTC Droid DNA (monarudo)
 * HTC One S (ville)
