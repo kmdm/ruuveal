@@ -2,7 +2,7 @@
 #include "devices.h"
 
 htc_device_t htc_devices[] = {
-    { "deluxe_ub1", "HTC J Butterfly", 0 },
+    { "deluxe_ub1", "HTC Butterfly", 0 },
     { "endeavor_td", "HTC One XT", 1 },
     { "endeavor_u", "HTC One X (T3)", 2 },
     { "enrc2_u", "HTC One X+", 3 },
