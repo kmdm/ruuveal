@@ -16,6 +16,7 @@ Supported Devices
 
 The following devices are currently supported by ruuveal:-
 
+* HTC J Butterfly (deluxe\_ub1)
 * HTC One XT (endeavor\_td)
 * HTC One X (T3) (endeavor\_u)
 * HTC One X+ (enrc2\_u)
