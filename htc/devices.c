@@ -2,19 +2,20 @@
 #include "devices.h"
 
 htc_device_t htc_devices[] = {
-    { "deluxe_u", "HTC Deluxe U", 0 },
-    { "deluxe_ub1", "HTC Butterfly", 1 },
-    { "endeavor_td", "HTC One XT", 2 },
-    { "endeavor_u", "HTC One X (T3)", 3 },
-    { "enrc2_u", "HTC One X+", 4 },
-    { "enrc2b_u", "HTC One X+", 5 },
-    { "evita", "HTC One X (S4)", 6 },
-    { "evitare_ul", "HTC One X+ LTE", 7 },
-    { "fireball", "HTC Incredible 4G LTE", 8 },
-    { "jel_dd", "HTC One XC", 9 },
-    { "jewel", "HTC Evo 4G LTE", 10 },
-    { "monarudo", "HTC Droid DNA", 11 },
-    { "ville", "HTC One S", 12 },
+    { "cp2dug", "HTC One SU", 0 },
+    { "deluxe_u", "HTC Deluxe U", 1 },
+    { "deluxe_ub1", "HTC Butterfly", 2 },
+    { "endeavor_td", "HTC One XT", 3 },
+    { "endeavor_u", "HTC One X (T3)", 4 },
+    { "enrc2_u", "HTC One X+", 5 },
+    { "enrc2b_u", "HTC One X+", 6 },
+    { "evita", "HTC One X (S4)", 7 },
+    { "evitare_ul", "HTC One X+ LTE", 8 },
+    { "fireball", "HTC Incredible 4G LTE", 9 },
+    { "jel_dd", "HTC One XC", 10 },
+    { "jewel", "HTC Evo 4G LTE", 11 },
+    { "monarudo", "HTC Droid DNA", 12 },
+    { "ville", "HTC One S", 13 },
     { 0, 0, 0 }
 };
 
