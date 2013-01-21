@@ -3,19 +3,20 @@
 
 htc_device_t htc_devices[] = {
     { "cp2dug", "HTC One SU", 0 },
-    { "deluxe_u", "HTC Deluxe U", 1 },
-    { "deluxe_ub1", "HTC Butterfly", 2 },
-    { "endeavor_td", "HTC One XT", 3 },
-    { "endeavor_u", "HTC One X (T3)", 4 },
-    { "enrc2_u", "HTC One X+", 5 },
-    { "enrc2b_u", "HTC One X+", 6 },
-    { "evita", "HTC One X (S4)", 7 },
-    { "evitare_ul", "HTC One X+ LTE", 8 },
-    { "fireball", "HTC Incredible 4G LTE", 9 },
-    { "jel_dd", "HTC One XC", 10 },
-    { "jewel", "HTC Evo 4G LTE", 11 },
-    { "monarudo", "HTC Droid DNA", 12 },
-    { "ville", "HTC One S", 13 },
+    { "deluxe_j", "HTC J Butterfly", 1 },
+    { "deluxe_u", "HTC J DNA", 2 },
+    { "deluxe_ub1", "HTC Butterfly", 3 },
+    { "endeavor_td", "HTC One XT", 4 },
+    { "endeavor_u", "HTC One X (T3)", 5 },
+    { "enrc2_u", "HTC One X+", 6 },
+    { "enrc2b_u", "HTC One X+", 7 },
+    { "evita", "HTC One X (S4)", 8 },
+    { "evitare_ul", "HTC One X+ LTE", 9 },
+    { "fireball", "HTC Incredible 4G LTE", 10 },
+    { "jel_dd", "HTC One XC", 11 },
+    { "jewel", "HTC Evo 4G LTE", 12 },
+    { "monarudo", "HTC Droid DNA", 13 },
+    { "ville", "HTC One S", 14 },
     { 0, 0, 0 }
 };
 
