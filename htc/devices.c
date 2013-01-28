@@ -17,7 +17,8 @@ htc_device_t htc_devices[] = {
     { "jewel", "HTC Evo 4G LTE", 12 },
     { "k2_ul", "HTC One SV", 13 },
     { "monarudo", "HTC Droid DNA", 14 },
-    { "ville", "HTC One S", 15 },
+    { "tc2", "HTC One VX", 15 },
+    { "ville", "HTC One S", 16 },
     { 0, 0, 0 }
 };
 
