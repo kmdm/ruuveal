@@ -16,6 +16,7 @@ Supported Devices
 
 The following devices are currently supported by ruuveal:-
 
+* HTC One ST (cp2dtg)
 * HTC One SU (cp2dug)
 * HTC J Butterfly (deluxe\_j)
 * HTC J DNA (deluxe\_u)
@@ -31,6 +32,7 @@ The following devices are currently supported by ruuveal:-
 * HTC Evo 4G LTE (jewel)
 * HTC One SV (k2\_ul)
 * HTC Droid DNA (monarudo)
+* HTC Desire X (prototd)
 * HTC One VX (tc2)
 * HTC One S (ville)
 
