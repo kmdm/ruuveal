@@ -1,6 +1,8 @@
 ruuveal
 =======
 
+*THIS IS A TEST BRANCH FOR ENCRYPTION - IT IS ENTIRELY UNTESTED*
+
 ruuveal decrypts encrypted zip files contained in RUUs released by HTC.
 
 ruuveal has been (somewhat) tested but that doesn't mean it won't cause the end of the world as we know it. You have been warned. 
@@ -64,11 +66,11 @@ Downloads are currently available from:-
 Usage
 -----
 
-    $ ruuveal device encrypted-rom.zip output.zip
+    $ ruuveal [options] --device DEVICE source.zip output.zip
 
 For example:
 
-    $ ruuveal jewel rom_01.zip rom_01_decrypted.zip
+    $ ruuveal --device jewel rom_01.zip rom_01_decrypted.zip
 
 Once you have decrypted the zip file, it should unzip with any standard zip utility.
 

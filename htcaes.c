@@ -18,6 +18,7 @@
  * along with ruuveal.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <mcrypt.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -57,13 +58,22 @@ static int decrypt_chunk(MCRYPT td, char *buf, int size, char *key, char *iv)
     memcpy(iv, new_iv, HTC_AES_KEYSIZE);
 }
 
-int htc_aes_decrypt(FILE *in, FILE *out, char *key, char *iv, 
-                    unsigned int chunk_size, htc_aes_progress_t callback)
+static int encrypt_chunk(MCRYPT td, char *buf, int size, char *key, char *iv)
+{
+    mcrypt_generic_init(td, key, HTC_AES_KEYSIZE, iv);
+    mcrypt_generic(td, buf, size);
+    mcrypt_generic_deinit(td);
+    memcpy(iv, &buf[size - HTC_AES_KEYSIZE], HTC_AES_KEYSIZE);
+}
+
+static int htc_aes_crypt(FILE *in, FILE *out, char *key, char *iv, 
+                  unsigned char chunks_in, htc_aes_progress_t callback,
+                  htc_aes_crypt_t crypt_func)
 {
     char buf[HTC_AES_READBUF], orig_iv[HTC_AES_KEYSIZE];
     unsigned int pos, size, chunks, bytes, chunksdone = 0;
     unsigned int count = HTC_AES_READBUF_ROUNDS + 1;
-    
+    unsigned int chunk_size = (((int)chunks_in)<<HTC_AES_CHUNK_SIZE); 
     MCRYPT td;
 
     /* Get size of zip data. */
@@ -80,9 +90,9 @@ int htc_aes_decrypt(FILE *in, FILE *out, char *key, char *iv,
         perror("failed to open mcrypt module");
         return 0;
     }
-    
+
     memcpy(orig_iv, iv, HTC_AES_KEYSIZE);
-    
+
     while((bytes = fread(buf, sizeof(char), sizeof(buf), in)) > 0) {
         if(callback) callback(ftell(in), size);
         if(chunksdone < chunks) {
@@ -92,7 +102,7 @@ int htc_aes_decrypt(FILE *in, FILE *out, char *key, char *iv,
             }            
             
             if(count < HTC_AES_READBUF_ROUNDS) {
-                decrypt_chunk(td, buf, sizeof(buf), key, iv);
+                crypt_func(td, buf, sizeof(buf), key, iv);
                 count++;
             } else if(count == HTC_AES_READBUF_ROUNDS) {
                 chunksdone++;
@@ -105,3 +115,17 @@ int htc_aes_decrypt(FILE *in, FILE *out, char *key, char *iv,
     mcrypt_module_close(td);
     return 1;
 }
+
+int htc_aes_decrypt(FILE *in, FILE *out, char *key, char *iv, 
+                   unsigned char chunks, htc_aes_progress_t callback)
+{
+    return htc_aes_crypt(in, out, key, iv, chunks, callback, decrypt_chunk);
+}
+
+int htc_aes_encrypt(FILE *in, FILE *out, char *key, char *iv, 
+                   unsigned char chunks, htc_aes_progress_t callback)
+{
+    return htc_aes_crypt(in, out, key, iv, chunks, callback, encrypt_chunk);
+}
+
+
