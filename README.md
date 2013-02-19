@@ -32,7 +32,9 @@ The following devices are currently supported by ruuveal:-
 * HTC Evo 4G LTE (jewel)
 * HTC One SV (k2\_ul)
 * HTC Droid DNA (monarudo)
-* HTC Desire X (prototd)
+* HTC Desire X (proto)
+* HTC Desire V (protodug)
+* HTC T329t (prototd)
 * HTC One VX (tc2)
 * HTC One S (ville)
 
