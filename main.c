@@ -1,7 +1,7 @@
 /* ruuveal - Decrypt HTC encrypted RUUs (rom.zip files).
  *
  * Copyright (C) 2013 Kenny Millington
- * 
+ *
  * This file is part of ruuveal.
  *
  * ruuveal is free software: you can redistribute it and/or modify
@@ -39,6 +39,7 @@
 
 static struct {
     char encrypt;
+    char info;
     unsigned short keymap_index;
     unsigned int chunks;
     char mainver[HTC_ZIP_HEADER_MAINVER_SIZE];
@@ -83,16 +84,17 @@ static void dump(const char *label, const unsigned char *data, int len)
 }
 #endif
 
-int usage(const char **argv)
+int usage(char * const *argv)
 {
     int i;
     htc_device_t *ptr;
 
     printf("usage:-\n\n");
-    printf("%s [options] --device DEVICE <source.zip> <output.zip>\n\n", 
+    printf("%s [options] --device DEVICE <source.zip> <output.zip>\n\n",
            argv[0]);
-    
+
     printf("options:-\n\n");
+    printf("--info, -I\t\t\tDisplays info about an encrypted zip\n");
     printf("--encrypt, -E\t\t\tSet encryption mode\n");
     printf("--mainver MAINVER, -m\t\tSet the mainver when encrypting\n");
     printf("--key KEYINDEX, -k\t\tSet the encryption key index\n");
@@ -103,10 +105,11 @@ int usage(const char **argv)
         printf("* %s (%s)\n", ptr->desc, ptr->name);
     }
     printf("\n");
+
     return -1;
 }
 
-void progress_update(unsigned int pos, unsigned int size) 
+void progress_update(unsigned int pos, unsigned int size)
 {
     printf("Processing ZIP... %d/%d\r", pos, size);
 }
@@ -121,11 +124,12 @@ static int parse_opts(int argc, char * const *argv)
         { "chunks", required_argument, NULL, 'c' },
         { "device", required_argument, NULL, 'd' },
         { "mainver", required_argument, NULL, 'm' },
+        { "info", no_argument, NULL, 'I' },
         { 0, 0, 0, 0}
     };
 
     while(
-        (c = getopt_long(argc, argv, "Ek:c:d:m:", longopts, &index)) != -1
+        (c = getopt_long(argc, argv, "Ek:c:d:m:I", longopts, &index)) != -1
     ) switch(c) {
         case 'E':
             opts.encrypt = 1;
@@ -138,28 +142,42 @@ static int parse_opts(int argc, char * const *argv)
         break;
         case 'd':
             strncpy(opts.device, optarg, sizeof(opts.device));
+        break;
         case 'm':
             strncpy(opts.mainver, optarg, sizeof(opts.mainver));
         break;
+        case 'I':
+            opts.info = 1;
+        break;
     }
+
+    if(opts.encrypt && opts.info) {
+        return 0;
+    }
+
+    if(argc - optind < 1) {
+        return 0;
+    }
+
+    strncpy(opts.source, argv[optind], sizeof(opts.source));
 
     if(argc - optind >= 2) {
-        strncpy(opts.source, argv[optind], sizeof(opts.source));    
-        strncpy(opts.dest, argv[optind+1], sizeof(opts.dest));    
-        return 1;
+        strncpy(opts.dest, argv[optind+1], sizeof(opts.dest));
+    } else if(!opts.info) {
+        return 0;
     }
 
-    return 0;
+    return 1;
 }
 
-int main(int argc, const char **argv)
+int main(int argc, char * const *argv)
 {
     char key[HTC_AES_KEYSIZE] = {0};
     char iv[HTC_AES_KEYSIZE] = {0};
     int rc = 0;
 
     htc_zip_header_t header;
-    
+
     // FIXME: Better way to set these defaults.
     opts.keymap_index = HTC_ZIP_HEADER_DEFAULT_KEYMAP;
     opts.chunks = HTC_ZIP_HEADER_DEFAULT_CHUNKS;
@@ -169,7 +187,7 @@ int main(int argc, const char **argv)
 
     printf("ruuveal\n");
     printf("-------\n\n");
-    
+
     if(!parse_opts(argc, argv)) {
         usage(argv);
         FAIL(-1);
@@ -180,16 +198,26 @@ int main(int argc, const char **argv)
         perror("failed to open source zip");
         FAIL(-2)
     }
-    
+
     /* Read the header. */
     if(!opts.encrypt) {
         if(!htc_zip_read_header(in, &header)) {
             fseek(in, 0x100, SEEK_SET);
             if(!htc_zip_read_header(in, &header)) {
-                fprintf(stderr, "invalid htc aes encrypted zip file!");
-              FAIL(-4);
+                fprintf(stderr, "invalid htc aes encrypted zip file!\n");
+                FAIL(-4);
             }
         }
+
+        if(opts.info) {
+            printf("encrypted zip info:-\n\n");
+            printf("keyindex: 0x%04x\n", header.keymap_index);
+            printf("chunks: 0x%02x\n", header.chunks);
+            printf("mainver: %.*s\n\n",
+                   HTC_ZIP_HEADER_MAINVER_SIZE, header.mainver);
+            goto end;
+        }
+
     } else {
         htc_zip_init_header(&header);
         header.keymap_index = opts.keymap_index;
@@ -211,22 +239,22 @@ int main(int argc, const char **argv)
         perror("failed to open output zip destination");
         FAIL(-6)
     }
-    
+
     /* Process the zip file. */
     if(opts.encrypt) {
         htc_zip_write_header(out, &header);
         if(!htc_aes_encrypt(in, out, key, iv, header.chunks, progress_update)) {
             fprintf(stderr, "failed to encrypt zip file!\n");
-            FAIL(-7) 
+            FAIL(-7)
         }
-        
+
         printf("Encrypted RUU (zip) written to: %s\n", opts.dest);
     } else {
         if(!htc_aes_decrypt(in, out, key, iv, header.chunks, progress_update)) {
             fprintf(stderr, "failed to decrypt zip file!\n");
-            FAIL(-7) 
+            FAIL(-7)
         }
-        
+
         printf("Decrypted RUU (zip) written to: %s\n", opts.dest);
     }
 

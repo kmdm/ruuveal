@@ -6,7 +6,7 @@
 
 #include "htczip.h"
 
-static unsigned short swap(unsigned short s)
+static inline unsigned short swap(unsigned short s)
 {
     return __bswap_constant_16(s);
 }
@@ -29,12 +29,18 @@ int htc_zip_read_header(FILE *in, htc_zip_header_t *header)
         perror("failed to read htc zip header");
         return 0;
     }
-    
+
     if(strncmp(header->magic, HTC_ZIP_HEADER_MAGIC, 
                strlen(HTC_ZIP_HEADER_MAGIC))) {
         return 0;
     }
-    
+
+    // FIXME
+    if(header->mainver[0] == '\xff') {
+        memmove(header->mainver, &header->mainver[1],
+                HTC_ZIP_HEADER_MAINVER_SIZE);
+    }
+
     header->keymap_index = swap(header->keymap_index);
     return 1;
 }
