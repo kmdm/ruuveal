@@ -30,20 +30,20 @@ static inline unsigned short swap(unsigned short s)
     return __bswap_constant_16(s);
 }
 
-static void fix_mainver_string(char *mainver, int size)
+static void left_align_mainver_string(char *mainver, int size)
 {
-    int i;
+    char *p = mainver, *q = p;
+    while(*p == '\xff') p++;
+    while(*p != '\xff' && p - mainver < size) *(q++) = *(p++);
+    *q = 0;
+}
 
-    for(i=0; i < size - 1; i++) {
-        if(mainver[i] == '\xff') {
-            mainver[i] = mainver[i+1];
-            mainver[i+1] = '\xff';
-        }
-    }
-
-    if(mainver[size - 1] == '\xff') {
-        mainver[size - 1] = 0;
-    }
+static void right_align_mainver_string(char *mainver, int size)
+{
+    char *p = mainver + size - 1, *q = p;
+    while(*p == '\xff' || *p == 0) p--;
+    while(*p != '\xff' && p - mainver >= 0) *(q--) = *(p--);
+    while(q - mainver >= 0) *(q--) = '\xff';
 }
 
 int htc_zip_init_header(htc_zip_header_t *header)
@@ -53,9 +53,6 @@ int htc_zip_init_header(htc_zip_header_t *header)
     strcpy(header->magic, HTC_ZIP_HEADER_MAGIC);
     header->keymap_index = HTC_ZIP_HEADER_DEFAULT_KEYMAP;
     header->chunks = HTC_ZIP_HEADER_DEFAULT_CHUNKS;
-    
-    strncpy(header->mainver, HTC_ZIP_HEADER_DEFAULT_MAINVER, 
-            sizeof(header->mainver));
 }
 
 int htc_zip_read_header(FILE *in, htc_zip_header_t *header)
@@ -70,7 +67,7 @@ int htc_zip_read_header(FILE *in, htc_zip_header_t *header)
         return 0;
     }
 
-    fix_mainver_string(header->mainver, HTC_ZIP_HEADER_MAINVER_SIZE);
+    left_align_mainver_string(header->mainver, HTC_ZIP_HEADER_MAINVER_SIZE);
 
     header->keymap_index = swap(header->keymap_index);
     return 1;
@@ -81,12 +78,14 @@ int htc_zip_write_header(FILE *out, htc_zip_header_t *header)
     int rc = 1;
 
     header->keymap_index = swap(header->keymap_index);
-    
+    right_align_mainver_string(header->mainver, HTC_ZIP_HEADER_MAINVER_SIZE);
+
     if(fwrite(header, 1, sizeof(*header), out) != sizeof(*header)) {
         perror("failed to write htc zip header");
         rc = 0;
     }
 
     header->keymap_index = swap(header->keymap_index);
+    left_align_mainver_string(header->mainver, HTC_ZIP_HEADER_MAINVER_SIZE);
     return rc;
 }

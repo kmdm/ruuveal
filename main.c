@@ -138,7 +138,7 @@ static int parse_opts(int argc, char * const *argv)
             opts.keymap_index = (unsigned short)strtoul(optarg, 0, 16);
         break;
         case 'c':
-            opts.chunks = optarg[0];
+            opts.chunks = (char)strtoul(optarg, 0, 16);
         break;
         case 'd':
             strncpy(opts.device, optarg, sizeof(opts.device));
