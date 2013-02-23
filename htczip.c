@@ -11,6 +11,22 @@ static inline unsigned short swap(unsigned short s)
     return __bswap_constant_16(s);
 }
 
+static void fix_mainver_string(char *mainver, int size)
+{
+    int i;
+
+    for(i=0; i < size - 1; i++) {
+        if(mainver[i] == '\xff') {
+            mainver[i] = mainver[i+1];
+            mainver[i+1] = '\xff';
+        }
+    }
+
+    if(mainver[size - 1] == '\xff') {
+        mainver[size - 1] = 0;
+    }
+}
+
 int htc_zip_init_header(htc_zip_header_t *header)
 {
     memset(header, 0xff, sizeof(*header));
@@ -35,11 +51,7 @@ int htc_zip_read_header(FILE *in, htc_zip_header_t *header)
         return 0;
     }
 
-    // FIXME
-    if(header->mainver[0] == '\xff') {
-        memmove(header->mainver, &header->mainver[1],
-                HTC_ZIP_HEADER_MAINVER_SIZE);
-    }
+    fix_mainver_string(header->mainver, HTC_ZIP_HEADER_MAINVER_SIZE);
 
     header->keymap_index = swap(header->keymap_index);
     return 1;
