@@ -15,7 +15,7 @@ for x in *.zip; do
     d=$(echo $x | sed 's/\.zip//')
     echo -n "Testing $d..."
     rm -f $TMPDIR/*
-    if ! $RUUVEAL $d $x $TMPDIR/out.zip &>/dev/null; then
+    if ! $RUUVEAL --device $d $x $TMPDIR/out.zip &>/dev/null; then
         echo "failed (ruuveal)."
         continue
     fi

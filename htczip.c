@@ -21,13 +21,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <bits/byteswap.h>
-
 #include "htczip.h"
 
 static inline unsigned short swap(unsigned short s)
 {
-    return __bswap_constant_16(s);
+    return ((s & 0xff00)>>8) | ((s & 0xff)<<8);
 }
 
 static void left_align_mainver_string(char *mainver, int size)
