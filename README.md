@@ -30,6 +30,8 @@ The following devices are currently supported by ruuveal:-
 * HTC Incredible 4G LTE (fireball)
 * HTC One XC (jel\_dd)
 * HTC Evo 4G LTE (jewel)
+* HTC One SV (k2\_plc\_cl)
+* HTC One SV (k2\_u)
 * HTC One SV (k2\_ul)
 * HTC One U (m7\_u)
 * HTC One UL (m7\_ul)
