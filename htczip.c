@@ -55,13 +55,17 @@ int htc_zip_init_header(htc_zip_header_t *header)
 
 int htc_zip_read_header(FILE *in, htc_zip_header_t *header)
 {
+    int pos = ftell(in);
+
     if(fread(header, 1, sizeof(*header), in) != sizeof(*header)) {
         perror("failed to read htc zip header");
+        fseek(in, pos, SEEK_SET);
         return 0;
     }
-
+    
     if(strncmp(header->magic, HTC_ZIP_HEADER_MAGIC, 
                strlen(HTC_ZIP_HEADER_MAGIC))) {
+        fseek(in, pos, SEEK_SET);
         return 0;
     }
 

@@ -25,6 +25,7 @@
 
 #include "htcaes.h"
 #include "htckey.h"
+#include "htclargezip.h"
 #include "htczip.h"
 
 #include "htc/devices.h"
@@ -180,42 +181,21 @@ static int parse_opts(int argc, char * const *argv)
     return 1;
 }
 
-int main(int argc, char * const *argv)
+static int process_zip(FILE *in, int length, const char *filename)
 {
+    int rc = 0;
     char key[HTC_AES_KEYSIZE] = {0};
     char iv[HTC_AES_KEYSIZE] = {0};
     char *keydata = NULL;
     int rc = 0;
 
-    FILE *fh;
-
+    FILE *out;
     htc_zip_header_t header;
-
-    // FIXME: Better way to set these defaults.
-    opts.keymap_index = HTC_ZIP_HEADER_DEFAULT_KEYMAP;
-    opts.chunks = HTC_ZIP_HEADER_DEFAULT_CHUNKS;
-    strncpy(opts.mainver, HTC_ZIP_HEADER_DEFAULT_MAINVER, sizeof(opts.mainver));
-
-    FILE *in = NULL, *out = NULL;
-
-    printf("ruuveal\n");
-    printf("-------\n\n");
-
-    if(!parse_opts(argc, argv)) {
-        usage(argv);
-        FAIL(-1);
-    }
-
-    /* Open the source file. */
-    if((in = fopen(opts.source, "rb")) == NULL) {
-        perror("failed to open source zip");
-        FAIL(-2)
-    }
 
     /* Read the header. */
     if(!opts.encrypt) {
         if(!htc_zip_read_header(in, &header)) {
-            fseek(in, 0x100, SEEK_SET);
+            fseek(in, 0x100, SEEK_CUR);
             if(!htc_zip_read_header(in, &header)) {
                 fprintf(stderr, "invalid htc aes encrypted zip file!\n");
                 FAIL(-4);
@@ -273,7 +253,7 @@ int main(int argc, char * const *argv)
     DEBUG(dump("iv", iv, sizeof(iv));)
 
     /* Open the output file. */
-    if((out = fopen(opts.dest, "wb")) == NULL) {
+    if((out = fopen(filename, "wb")) == NULL) {
         perror("failed to open output zip destination");
         FAIL(-6)
     }
@@ -286,19 +266,73 @@ int main(int argc, char * const *argv)
             FAIL(-7)
         }
 
-        printf("Encrypted RUU (zip) written to: %s\n", opts.dest);
+        printf("Encrypted RUU (zip) written to: %s\n", filename);
     } else {
-        if(!htc_aes_decrypt(in, out, key, iv, header.chunks, progress_update)) {
+        if(!htc_aes_decrypt(in, length, out, key, iv, header.chunks, 
+                            progress_update)) {
             fprintf(stderr, "failed to decrypt zip file!\n");
             FAIL(-7)
         }
 
-        printf("Decrypted RUU (zip) written to: %s\n", opts.dest);
+        printf("Decrypted RUU (zip) written to: %s\n", filename);
     }
 
 
+
+end:
+    if(out) fclose(out);
+    return rc;
+}
+
+int main(int argc, char * const *argv)
+{
+    int i, rc = 0;
+    char *name = 0;
+    htc_largezip_header_t hdr;
+
+    // FIXME: Better way to set these defaults.
+    opts.keymap_index = HTC_ZIP_HEADER_DEFAULT_KEYMAP;
+    opts.chunks = HTC_ZIP_HEADER_DEFAULT_CHUNKS;
+    strncpy(opts.mainver, HTC_ZIP_HEADER_DEFAULT_MAINVER, sizeof(opts.mainver));
+
+    FILE *in = NULL;
+
+    printf("ruuveal\n");
+    printf("-------\n\n");
+
+    if(!parse_opts(argc, argv)) {
+        usage(argv);
+        FAIL(-1);
+    }
+
+    /* Open the source file. */
+    if((in = fopen(opts.source, "rb")) == NULL) {
+        perror("failed to open source zip");
+        FAIL(-2)
+    }
+    
+    /* Check for a "Large Zip" */
+    if(!opts.encrypt && htc_largezip_read_header(in, &hdr)) {
+        printf("Large zip format detected containing %d zipfile(s)\n", 
+               hdr.count);
+        
+        if((name = calloc(strlen(opts.dest) + 3, sizeof(char))) == NULL) {
+            FAIL(-8) 
+        };
+        
+        for(i=0; i<hdr.count;i++) {
+            sprintf(name, "%02d_", i + 1);
+            strcat(name, opts.dest);
+            fseek(in, sizeof(hdr) + hdr.starts[i], SEEK_SET);
+            rc = process_zip(in, hdr.lengths[i], name);
+            if(rc != 0) goto end;
+        }
+    } else {
+        rc = process_zip(in, -1, opts.dest);
+    }
+
 end:
     if(in) fclose(in);
-    if(out) fclose(out);
+    if(name) free(name);
     return rc;
 }
