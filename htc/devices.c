@@ -22,13 +22,14 @@ htc_device_t htc_devices[] = {
     { "m7_u", "HTC One U", 17 },
     { "m7_ul", "HTC One UL", 18 },
     { "m7_wls", "HTC One WLS", 19 },
-    { "magnids", "HTC Desire SV", 20 },
-    { "monarudo", "HTC Droid DNA", 21 },
-    { "proto", "HTC Desire X", 22 },
-    { "protodug", "HTC Desire V", 23 },
-    { "prototd", "HTC T329t", 24 },
-    { "tc2", "HTC One VX", 25 },
-    { "ville", "HTC One S", 26 },
+    { "m7cdwg", "HTC One CDWG", 20 },
+    { "magnids", "HTC Desire SV", 21 },
+    { "monarudo", "HTC Droid DNA", 22 },
+    { "proto", "HTC Desire X", 23 },
+    { "protodug", "HTC Desire V", 24 },
+    { "prototd", "HTC T329t", 25 },
+    { "tc2", "HTC One VX", 26 },
+    { "ville", "HTC One S", 27 },
     { 0, 0, 0 }
 };
 
