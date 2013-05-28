@@ -36,6 +36,7 @@ The following devices are currently supported by ruuveal:-
 * HTC One U (m7\_u)
 * HTC One UL (m7\_ul)
 * HTC One WLS (m7\_wls)
+* HTC One CDUG (m7cdug)
 * HTC One CDWG (m7cdwg)
 * HTC Desire SV (magnids)
 * HTC Droid DNA (monarudo)
