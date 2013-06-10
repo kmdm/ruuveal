@@ -41,6 +41,7 @@ The following devices are currently supported by ruuveal:-
 * HTC One - China Telecom (m7cdwg)
 * HTC Desire SV (magnids)
 * HTC Droid DNA (monarudo)
+* HTC First (mystul)
 * HTC Desire X (proto)
 * HTC Desire V (protodug)
 * HTC T329t (prototd)
