@@ -33,6 +33,7 @@ htc_device_t htc_devices[] = {
     { "prototd", "HTC T329t", 28 },
     { "tc2", "HTC One VX", 29 },
     { "ville", "HTC One S", 30 },
+    { "villec2", "HTC One S C2", 31 },
     { 0, 0, 0 }
 };
 
