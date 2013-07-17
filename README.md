@@ -18,6 +18,7 @@ The following devices are currently supported by ruuveal:-
 
 * HTC One ST (cp2dtg)
 * HTC One SU (cp2dug)
+* HTC Desire 600 - China Unicom (cp3dug)
 * HTC J Butterfly (deluxe\_j)
 * HTC J DNA (deluxe\_u)
 * HTC Butterfly (deluxe\_ub1)
@@ -47,6 +48,7 @@ The following devices are currently supported by ruuveal:-
 * HTC T329t (prototd)
 * HTC One VX (tc2)
 * HTC One S (ville)
+* HTC One S C2 (villec2)
 
 
 If your device is not supported and you would like it supported please open an issue in the tracker with the device name, codename and a link to the most recent hboot file for the device. (Not a link to the full RUU!)
