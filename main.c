@@ -153,6 +153,9 @@ static int parse_opts(int argc, char * const *argv)
 
     if(opts.encrypt && opts.info) {
         return 0;
+    } else if(strlen(opts.device) == 0) {
+        fprintf(stderr, "error: --device is a required argument.\n\n");
+        return 0;
     }
 
     if(argc - optind < 1) {
