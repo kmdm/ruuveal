@@ -1,4 +1,5 @@
 #ifndef HTCKEY_H
 #define HTCKEY_H
-int htc_generate_aes_keys(const char *, int, char *, char *);
+#define HTC_KEYDATA_LEN 0x60
+int htc_generate_aes_keys(const char *, int, char *, char *, const char *);
 #endif

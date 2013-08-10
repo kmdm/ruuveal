@@ -46,6 +46,7 @@ static struct {
     char device[32];
     char source[256];
     char dest[256];
+    char keydata_file[256];
 } opts = {0};
 
 #ifdef DEBUG_ENABLED
@@ -99,6 +100,7 @@ int usage(char * const *argv)
     printf("--mainver MAINVER, -m\t\tSet the mainver when encrypting\n");
     printf("--key KEYINDEX, -k\t\tSet the encryption key index\n");
     printf("--chunks CHUNKS, -c\t\tSet the number of encryption chunks\n\n");
+    printf("--keydata-file, -K\t\tOverride the compiled in keydata\n\n");
 
     printf("supported devices:-\n\n");
     for(ptr = htc_get_devices(); *ptr->name; ptr++) {
@@ -125,11 +127,12 @@ static int parse_opts(int argc, char * const *argv)
         { "device", required_argument, NULL, 'd' },
         { "mainver", required_argument, NULL, 'm' },
         { "info", no_argument, NULL, 'I' },
+        { "keydata-file", required_argument, NULL, 'K' },
         { 0, 0, 0, 0}
     };
 
     while(
-        (c = getopt_long(argc, argv, "Ek:c:d:m:I", longopts, &index)) != -1
+        (c = getopt_long(argc, argv, "Ek:c:d:m:IK:", longopts, &index)) != -1
     ) switch(c) {
         case 'E':
             opts.encrypt = 1;
@@ -149,11 +152,15 @@ static int parse_opts(int argc, char * const *argv)
         case 'I':
             opts.info = 1;
         break;
+        case 'K':
+            strncpy(opts.keydata_file, optarg, sizeof(opts.keydata_file));
+        break;
+
     }
 
     if(opts.encrypt && opts.info) {
         return 0;
-    } else if(strlen(opts.device) == 0) {
+    } else if(strlen(opts.device) == 0 && strlen(opts.keydata_file) == 0) {
         fprintf(stderr, "error: --device is a required argument.\n\n");
         return 0;
     }
@@ -177,7 +184,10 @@ int main(int argc, char * const *argv)
 {
     char key[HTC_AES_KEYSIZE] = {0};
     char iv[HTC_AES_KEYSIZE] = {0};
+    char *keydata = NULL;
     int rc = 0;
+
+    FILE *fh;
 
     htc_zip_header_t header;
 
@@ -228,8 +238,33 @@ int main(int argc, char * const *argv)
         strncpy(header.mainver, opts.mainver, sizeof(header.mainver));
     }
 
+    if(strlen(opts.keydata_file) > 0) {
+        if(!(keydata = malloc(HTC_KEYDATA_LEN))) {
+            fprintf(stderr, "failed to allocate memory for keydata!\n");
+            FAIL(-8)
+        }
+
+        if(!(fh = fopen(opts.keydata_file, "rb"))) {
+            fprintf(stderr, "failed to open keydata file: %s\n",
+                    opts.keydata_file);
+            FAIL(-9)
+        }
+
+        if(fread(keydata,sizeof(char),HTC_KEYDATA_LEN,fh) != HTC_KEYDATA_LEN) {
+            fprintf(stderr, "failed to read keydata file: %s\n",
+                    opts.keydata_file);
+            fclose(fh);
+            FAIL(-10)
+        }
+
+        fclose(fh);
+    }
+
     /* Generate AES/IV for decryption. */
-    if(htc_generate_aes_keys(opts.device, header.keymap_index, key, iv) == 0) {
+    if(htc_generate_aes_keys(opts.device,
+                             header.keymap_index,
+                             key, iv, keydata) == 0
+    ) {
         fprintf(stderr, "failed to generate htc aes keys\n");
         FAIL(-5)
     }
