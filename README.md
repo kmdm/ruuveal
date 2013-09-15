@@ -16,12 +16,15 @@ Supported Devices
 
 The following devices are currently supported by ruuveal:-
 
+* HTC One SC (cp2dcg)
 * HTC One ST (cp2dtg)
 * HTC One SU (cp2dug)
 * HTC Desire 600 - China Unicom (cp3dug)
 * HTC J Butterfly (deluxe\_j)
 * HTC J DNA (deluxe\_u)
 * HTC Butterfly (deluxe\_ub1)
+* HTC Butterfly S (dlxp\_u)
+* HTC Butterfly S LTE (dlxp\_ul)
 * HTC One XT (endeavor\_td)
 * HTC One X (T3) (endeavor\_u)
 * HTC One X+ (enrc2\_u)
