@@ -187,9 +187,8 @@ static int process_zip(FILE *in, int length, const char *filename)
     char key[HTC_AES_KEYSIZE] = {0};
     char iv[HTC_AES_KEYSIZE] = {0};
     char *keydata = NULL;
-    int rc = 0;
 
-    FILE *out;
+    FILE *fh, *out;
     htc_zip_header_t header;
 
     /* Read the header. */
