@@ -57,6 +57,7 @@ The following devices are currently supported by ruuveal:-
 * HTC T329t (prototd)
 * HTC One Max - China Telecom (t6dwg)
 * HTC One Max WHL (t6whl)
+* HTC One Max WL (t6wl)
 * HTC One VX (tc2)
 * HTC One S (ville)
 * HTC One S C2 (villec2)
