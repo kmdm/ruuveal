@@ -56,6 +56,7 @@ The following devices are currently supported by ruuveal:-
 * HTC Desire X (proto)
 * HTC Desire V (protodug)
 * HTC T329t (prototd)
+* HTC One Max - China Unicom (t6dug)
 * HTC One Max - China Telecom (t6dwg)
 * HTC One Max WHL (t6whl)
 * HTC One Max WL (t6wl)
