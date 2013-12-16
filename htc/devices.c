@@ -39,9 +39,11 @@ htc_device_t htc_devices[] = {
     { "proto", "HTC Desire X", 34 },
     { "protodug", "HTC Desire V", 35 },
     { "prototd", "HTC T329t", 36 },
-    { "tc2", "HTC One VX", 37 },
-    { "ville", "HTC One S", 38 },
-    { "villec2", "HTC One S C2", 39 },
+    { "t6dwg", "HTC One Max - China Telecom", 37 },
+    { "t6whl", "HTC One Max WHL", 38 },
+    { "tc2", "HTC One VX", 39 },
+    { "ville", "HTC One S", 40 },
+    { "villec2", "HTC One S C2", 41 },
     { 0, 0, 0 }
 };
 
