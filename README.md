@@ -37,6 +37,8 @@ The following devices are currently supported by ruuveal:-
 * HTC One SV (k2\_plc\_cl)
 * HTC One SV (k2\_u)
 * HTC One SV (k2\_ul)
+* HTC One Mini U (m4\_u)
+* HTC One Mini UL (m4\_ul)
 * HTC One U (m7\_u)
 * HTC One UL (m7\_ul)
 * HTC One WLJ (m7\_wlj)
