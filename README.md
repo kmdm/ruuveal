@@ -25,6 +25,7 @@ The following devices are currently supported by ruuveal:-
 * HTC J Butterfly (deluxe\_j)
 * HTC J DNA (deluxe\_u)
 * HTC Butterfly (deluxe\_ub1)
+* HTC Butterfly S - China Unicom (dlpdug)
 * HTC Butterfly S (dlxp\_u)
 * HTC Butterfly S LTE (dlxp\_ul)
 * HTC One XT (endeavor\_td)
