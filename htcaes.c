@@ -66,12 +66,13 @@ static int encrypt_chunk(MCRYPT td, char *buf, int size, char *key, char *iv)
     memcpy(iv, &buf[size - HTC_AES_KEYSIZE], HTC_AES_KEYSIZE);
 }
 
-static int htc_aes_crypt(FILE *in, FILE *out, char *key, char *iv, 
-                  unsigned char chunks_in, htc_aes_progress_t callback,
-                  htc_aes_crypt_t crypt_func)
+static int htc_aes_crypt(FILE *in, unsigned int maxlen, 
+                         FILE *out, char *key, char *iv, 
+                         unsigned char chunks_in, htc_aes_progress_t callback,
+                         htc_aes_crypt_t crypt_func)
 {
     char buf[HTC_AES_READBUF], orig_iv[HTC_AES_KEYSIZE];
-    unsigned int pos, size, chunks, bytes, chunksdone = 0;
+    unsigned int pos, size, chunks, bytes, bytesdone = 0, chunksdone = 0;
     unsigned int count = HTC_AES_READBUF_ROUNDS + 1;
     unsigned int chunk_size = (((int)chunks_in)<<HTC_AES_CHUNK_SIZE); 
     MCRYPT td;
@@ -82,6 +83,10 @@ static int htc_aes_crypt(FILE *in, FILE *out, char *key, char *iv,
     size = ftell(in) - pos;
     fseek(in, pos, SEEK_SET);
     
+    if(maxlen > 0 && maxlen < size) {
+        size = maxlen;
+    }
+
     chunks = get_num_chunks(size, chunk_size);
     
     td = mcrypt_module_open(MCRYPT_RIJNDAEL_128, NULL, MCRYPT_CBC, NULL);
@@ -93,8 +98,12 @@ static int htc_aes_crypt(FILE *in, FILE *out, char *key, char *iv,
 
     memcpy(orig_iv, iv, HTC_AES_KEYSIZE);
 
-    while((bytes = fread(buf, sizeof(char), sizeof(buf), in)) > 0) {
-        if(callback) callback(ftell(in), size);
+    while(bytesdone < size && 
+          (bytes = fread(buf, sizeof(char), sizeof(buf), in)) > 0) {
+        bytesdone += bytes;
+        if(bytesdone > size) bytes -= (bytesdone - size);
+
+        if(callback) callback(bytesdone, size);
         if(chunksdone < chunks) {
             if((ftell(in) - bytes - pos) % chunk_size == 0) {
                 count = 0;
@@ -102,30 +111,30 @@ static int htc_aes_crypt(FILE *in, FILE *out, char *key, char *iv,
             }            
             
             if(count < HTC_AES_READBUF_ROUNDS) {
-                crypt_func(td, buf, sizeof(buf), key, iv);
+                crypt_func(td, buf, bytes, key, iv);
                 count++;
             } else if(count == HTC_AES_READBUF_ROUNDS) {
                 chunksdone++;
                 count++;
             }
         }
-        fwrite(buf, sizeof(char), sizeof(buf), out);
+        fwrite(buf, sizeof(char), bytes, out);
     }
 
     mcrypt_module_close(td);
     return 1;
 }
 
-int htc_aes_decrypt(FILE *in, FILE *out, char *key, char *iv, 
-                   unsigned char chunks, htc_aes_progress_t callback)
+int htc_aes_decrypt(FILE *in, unsigned int maxlen, FILE *out, char *key, 
+                    char *iv, unsigned char chunks, htc_aes_progress_t callback)
 {
-    return htc_aes_crypt(in, out, key, iv, chunks, callback, decrypt_chunk);
+    return htc_aes_crypt(in,maxlen,out,key,iv,chunks,callback,decrypt_chunk);
 }
 
 int htc_aes_encrypt(FILE *in, FILE *out, char *key, char *iv, 
                    unsigned char chunks, htc_aes_progress_t callback)
 {
-    return htc_aes_crypt(in, out, key, iv, chunks, callback, encrypt_chunk);
+    return htc_aes_crypt(in, -1, out, key, iv, chunks, callback, encrypt_chunk);
 }
 
 
