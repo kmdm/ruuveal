@@ -26,6 +26,7 @@ The following devices are currently supported by ruuveal:-
 * HTC Desire 700 - China Mobile (cp5dtu)
 * HTC Desire 700 - China Unicom (cp5dug)
 * HTC Desire 700 - China Telecom (cp5dwg)
+* HTC 603e - China Unicom (csndug)
 * HTC J Butterfly (deluxe\_j)
 * HTC J DNA (deluxe\_u)
 * HTC Butterfly (deluxe\_ub1)
