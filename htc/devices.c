@@ -33,8 +33,8 @@ htc_device_t htc_devices[] = {
     { "k2_plc_cl", "HTC One SV", 28 },
     { "k2_u", "HTC One SV", 29 },
     { "k2_ul", "HTC One SV", 30 },
-    { "m4", "HTC One Mini UL", 31 },
-    { "m4_u", "HTC One Mini U", 32 },
+    { "m4_u", "HTC One Mini U", 31 },
+    { "m4_ul", "HTC One Mini UL", 32 },
     { "m7_u", "HTC One U", 33 },
     { "m7_ul", "HTC One UL", 34 },
     { "m7_wlj", "HTC One WLJ", 35 },
@@ -62,7 +62,8 @@ htc_device_t htc_devices[] = {
     { "ville", "HTC One S", 57 },
     { "villec2", "HTC One S C2", 58 },
     { "z4td", "HTC Desire 500 TD", 59 },
-    { "zara_wl", "HTC Desire 601 WL", 60 },
+    { "zara_cl", "HTC Desire 601 CL", 60 },
+    { "zara_wl", "HTC Desire 601 WL", 61 },
     { 0, 0, 0 }
 };
 
