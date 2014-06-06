@@ -148,7 +148,8 @@ static int process_zip(FILE *in, FILE *hb, const char *keyfile)
     
     printf("\n");
 
-    for(i=0x9CE64; i >= 0x9CE64; i--) {
+    while(hbsize % 4 != 0) hbsize--;
+    for(i = hbsize - HTC_KEYDATA_LEN; i >= 0; i -= 4) {
         /* Generate AES/IV for decryption. */
         printf("\rBrute-forcing key: %d/%d...", i, hbsize);
         if(htc_generate_aes_keys(NULL, header.keymap_index, key, iv, 
