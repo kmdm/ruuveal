@@ -25,7 +25,7 @@
 
 #include "htcaes.h"
 
-static unsigned int get_num_chunks(unsigned int size, unsigned int chunk_size)
+unsigned int htc_get_num_chunks(unsigned int size, unsigned int chunk_size)
 {
     /* FIXME: This implementation could very well not be complete. */
     unsigned int chunks;
@@ -48,7 +48,12 @@ static unsigned int get_num_chunks(unsigned int size, unsigned int chunk_size)
     return chunks;
 }
 
-static int decrypt_chunk(MCRYPT td, char *buf, int size, char *key, char *iv)
+unsigned int htc_get_chunk_size(unsigned char chunks)
+{
+    return ((int)chunks)<<HTC_AES_CHUNK_SIZE;
+}
+
+int htc_aes_decrypt_chunk(MCRYPT td, char *buf, int size, char *key, char *iv)
 {
     char new_iv[HTC_AES_KEYSIZE];
     memcpy(new_iv, &buf[size - HTC_AES_KEYSIZE], HTC_AES_KEYSIZE);
@@ -58,7 +63,7 @@ static int decrypt_chunk(MCRYPT td, char *buf, int size, char *key, char *iv)
     memcpy(iv, new_iv, HTC_AES_KEYSIZE);
 }
 
-static int encrypt_chunk(MCRYPT td, char *buf, int size, char *key, char *iv)
+int htc_aes_encrypt_chunk(MCRYPT td, char *buf, int size, char *key, char *iv)
 {
     mcrypt_generic_init(td, key, HTC_AES_KEYSIZE, iv);
     mcrypt_generic(td, buf, size);
@@ -74,7 +79,7 @@ static int htc_aes_crypt(FILE *in, unsigned int maxlen,
     char buf[HTC_AES_READBUF], orig_iv[HTC_AES_KEYSIZE];
     unsigned int pos, size, chunks, bytes, bytesdone = 0, chunksdone = 0;
     unsigned int count = HTC_AES_READBUF_ROUNDS + 1;
-    unsigned int chunk_size = (((int)chunks_in)<<HTC_AES_CHUNK_SIZE);
+    unsigned int chunk_size = htc_get_chunk_size(chunks_in);
     MCRYPT td;
 
     /* Get size of zip data. */
@@ -87,7 +92,7 @@ static int htc_aes_crypt(FILE *in, unsigned int maxlen,
         size = maxlen;
     }
 
-    chunks = get_num_chunks(size, chunk_size);
+    chunks = htc_get_num_chunks(size, chunk_size);
 
     td = mcrypt_module_open(MCRYPT_RIJNDAEL_128, NULL, MCRYPT_CBC, NULL);
 
@@ -134,13 +139,13 @@ static int htc_aes_crypt(FILE *in, unsigned int maxlen,
 int htc_aes_decrypt(FILE *in, unsigned int maxlen, FILE *out, char *key,
                     char *iv, unsigned char chunks, htc_aes_progress_t callback)
 {
-    return htc_aes_crypt(in,maxlen,out,key,iv,chunks,callback,decrypt_chunk);
+    return htc_aes_crypt(in,maxlen,out,key,iv,chunks,callback,htc_aes_decrypt_chunk);
 }
 
 int htc_aes_encrypt(FILE *in, FILE *out, char *key, char *iv,
                    unsigned char chunks, htc_aes_progress_t callback)
 {
-    return htc_aes_crypt(in, -1, out, key, iv, chunks, callback, encrypt_chunk);
+    return htc_aes_crypt(in, -1, out, key, iv, chunks, callback, htc_aes_encrypt_chunk);
 }
 
 
