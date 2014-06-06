@@ -1,7 +1,7 @@
 /* ruuveal - Decrypt HTC encrypted RUUs (rom.zip files).
  *
  * Copyright (C) 2013 Kenny Millington
- * 
+ *
  * This file is part of ruuveal.
  *
  * ruuveal is free software: you can redistribute it and/or modify
@@ -25,11 +25,11 @@
 
 #include "htcaes.h"
 
-static unsigned int get_num_chunks(unsigned int size, unsigned int chunk_size) 
+static unsigned int get_num_chunks(unsigned int size, unsigned int chunk_size)
 {
     /* FIXME: This implementation could very well not be complete. */
     unsigned int chunks;
-    
+
     if(chunk_size == 1)
         return size;
     else if(chunk_size - 1 < 1)
@@ -38,10 +38,10 @@ static unsigned int get_num_chunks(unsigned int size, unsigned int chunk_size)
         return 0;
     else if(size == chunk_size)
         return 1;
-    
+
     chunks = size / chunk_size;
     chunks--;
-    
+
     if(size - (chunk_size * chunks) != 0)
         chunks++;
 
@@ -66,15 +66,15 @@ static int encrypt_chunk(MCRYPT td, char *buf, int size, char *key, char *iv)
     memcpy(iv, &buf[size - HTC_AES_KEYSIZE], HTC_AES_KEYSIZE);
 }
 
-static int htc_aes_crypt(FILE *in, unsigned int maxlen, 
-                         FILE *out, char *key, char *iv, 
+static int htc_aes_crypt(FILE *in, unsigned int maxlen,
+                         FILE *out, char *key, char *iv,
                          unsigned char chunks_in, htc_aes_progress_t callback,
                          htc_aes_crypt_t crypt_func)
 {
     char buf[HTC_AES_READBUF], orig_iv[HTC_AES_KEYSIZE];
     unsigned int pos, size, chunks, bytes, bytesdone = 0, chunksdone = 0;
     unsigned int count = HTC_AES_READBUF_ROUNDS + 1;
-    unsigned int chunk_size = (((int)chunks_in)<<HTC_AES_CHUNK_SIZE); 
+    unsigned int chunk_size = (((int)chunks_in)<<HTC_AES_CHUNK_SIZE);
     MCRYPT td;
 
     /* Get size of zip data. */
@@ -82,15 +82,15 @@ static int htc_aes_crypt(FILE *in, unsigned int maxlen,
     fseek(in, 0, SEEK_END);
     size = ftell(in) - pos;
     fseek(in, pos, SEEK_SET);
-    
+
     if(maxlen > 0 && maxlen < size) {
         size = maxlen;
     }
 
     chunks = get_num_chunks(size, chunk_size);
-    
+
     td = mcrypt_module_open(MCRYPT_RIJNDAEL_128, NULL, MCRYPT_CBC, NULL);
-    
+
     if(td == MCRYPT_FAILED) {
         perror("failed to open mcrypt module");
         return 0;
@@ -98,18 +98,17 @@ static int htc_aes_crypt(FILE *in, unsigned int maxlen,
 
     memcpy(orig_iv, iv, HTC_AES_KEYSIZE);
 
-    while(bytesdone < size && 
+    while(bytesdone < size &&
           (bytes = fread(buf, sizeof(char), sizeof(buf), in)) > 0) {
         bytesdone += bytes;
         if(bytesdone > size) bytes -= (bytesdone - size);
 
-        if(callback) callback(bytesdone, size);
         if(chunksdone < chunks) {
             if((ftell(in) - bytes - pos) % chunk_size == 0) {
                 count = 0;
                 memcpy(iv, orig_iv, HTC_AES_KEYSIZE);
-            }            
-            
+            }
+
             if(count < HTC_AES_READBUF_ROUNDS) {
                 crypt_func(td, buf, bytes, key, iv);
                 count++;
@@ -119,19 +118,26 @@ static int htc_aes_crypt(FILE *in, unsigned int maxlen,
             }
         }
         fwrite(buf, sizeof(char), bytes, out);
+
+        if(callback) {
+            if(!callback(bytesdone, size, buf, bytes)) {
+                mcrypt_module_close(td);
+                return 0;
+            }
+        }
     }
 
     mcrypt_module_close(td);
     return 1;
 }
 
-int htc_aes_decrypt(FILE *in, unsigned int maxlen, FILE *out, char *key, 
+int htc_aes_decrypt(FILE *in, unsigned int maxlen, FILE *out, char *key,
                     char *iv, unsigned char chunks, htc_aes_progress_t callback)
 {
     return htc_aes_crypt(in,maxlen,out,key,iv,chunks,callback,decrypt_chunk);
 }
 
-int htc_aes_encrypt(FILE *in, FILE *out, char *key, char *iv, 
+int htc_aes_encrypt(FILE *in, FILE *out, char *key, char *iv,
                    unsigned char chunks, htc_aes_progress_t callback)
 {
     return htc_aes_crypt(in, -1, out, key, iv, chunks, callback, encrypt_chunk);

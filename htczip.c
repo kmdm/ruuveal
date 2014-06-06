@@ -1,7 +1,7 @@
 /* ruuveal - Decrypt HTC encrypted RUUs (rom.zip files).
  *
  * Copyright (C) 2013 Kenny Millington
- * 
+ *
  * This file is part of ruuveal.
  *
  * ruuveal is free software: you can redistribute it and/or modify
@@ -62,8 +62,8 @@ int htc_zip_read_header(FILE *in, htc_zip_header_t *header)
         fseek(in, pos, SEEK_SET);
         return 0;
     }
-    
-    if(strncmp(header->magic, HTC_ZIP_HEADER_MAGIC, 
+
+    if(strncmp(header->magic, HTC_ZIP_HEADER_MAGIC,
                strlen(HTC_ZIP_HEADER_MAGIC))) {
         fseek(in, pos, SEEK_SET);
         return 0;

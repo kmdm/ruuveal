@@ -1,7 +1,7 @@
 /* ruuveal - Decrypt HTC encrypted RUUs (rom.zip files).
  *
  * Copyright (C) 2013 Kenny Millington
- * 
+ *
  * This file is part of ruuveal.
  *
  * ruuveal is free software: you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 
 #include "htclargezip.h"
 
-int htc_largezip_read_header(FILE *in, htc_largezip_header_t *header) 
+int htc_largezip_read_header(FILE *in, htc_largezip_header_t *header)
 {
     int pos = ftell(in);
 
@@ -34,12 +34,11 @@ int htc_largezip_read_header(FILE *in, htc_largezip_header_t *header)
         return 0;
     }
 
-    if(strncmp(header->magic, HTC_LARGEZIP_HEADER_MAGIC, 
+    if(strncmp(header->magic, HTC_LARGEZIP_HEADER_MAGIC,
                strlen(HTC_LARGEZIP_HEADER_MAGIC))) {
         fseek(in, pos, SEEK_SET);
-        fprintf(stderr, "not a largezip - header mismatch!\n");
         return 0;
     }
-    
+
     return 1;
 }

@@ -48,6 +48,7 @@ static struct {
     char source[256];
     char dest[256];
     char keydata_file[256];
+    char dump;
 } opts = {0};
 
 #ifdef DEBUG_ENABLED
@@ -112,9 +113,19 @@ int usage(char * const *argv)
     return -1;
 }
 
-void progress_update(unsigned int pos, unsigned int size)
+int progress_update(unsigned int pos, unsigned int size, const char *buf,
+                    unsigned int len)
 {
     printf("Processing ZIP... %d/%d\r", pos, size);
+
+    if(buf && len && pos == HTC_AES_READBUF) {
+        if(strncmp(buf, "PK", 2)) {
+            fprintf(stderr, "Invalid zip file - aborting!\n");
+            return 0;
+        }
+    }
+
+    return 1;
 }
 
 static int parse_opts(int argc, char * const *argv)
@@ -129,11 +140,12 @@ static int parse_opts(int argc, char * const *argv)
         { "mainver", required_argument, NULL, 'm' },
         { "info", no_argument, NULL, 'I' },
         { "keydata-file", required_argument, NULL, 'K' },
+        { "dump", no_argument, NULL, 'D' },
         { 0, 0, 0, 0}
     };
 
     while(
-        (c = getopt_long(argc, argv, "Ek:c:d:m:IK:", longopts, &index)) != -1
+        (c = getopt_long(argc, argv, "Ek:c:d:m:IK:D", longopts, &index)) != -1
     ) switch(c) {
         case 'E':
             opts.encrypt = 1;
@@ -155,12 +167,16 @@ static int parse_opts(int argc, char * const *argv)
         break;
         case 'K':
             strncpy(opts.keydata_file, optarg, sizeof(opts.keydata_file));
+            break;
+        case 'D':
+            opts.dump = 1;
         break;
 
     }
 
     if(opts.encrypt && opts.info) {
         return 0;
+    } else if(opts.dump) {
     } else if(strlen(opts.device) == 0 && strlen(opts.keydata_file) == 0) {
         fprintf(stderr, "error: --device is a required argument.\n\n");
         return 0;
@@ -240,7 +256,8 @@ static int process_zip(FILE *in, int length, const char *filename)
     }
 
     /* Generate AES/IV for decryption. */
-    if(htc_generate_aes_keys(opts.device,
+    if(!opts.dump &&
+       htc_generate_aes_keys(opts.device,
                              header.keymap_index,
                              key, iv, keydata) == 0
     ) {
@@ -258,7 +275,21 @@ static int process_zip(FILE *in, int length, const char *filename)
     }
 
     /* Process the zip file. */
-    if(opts.encrypt) {
+    if(opts.dump) {
+        keydata = malloc(HTC_AES_READBUF);
+        while(length > 0) {
+            fwrite(keydata, 1,
+                   fread(keydata, 1,
+                         (length > HTC_AES_READBUF) ? HTC_AES_READBUF : length,
+                         in
+                   ),
+                   out
+            );
+            length -= HTC_AES_READBUF;
+        }
+        free(keydata);
+        printf("Dumped (copied) zip file to: %s\n", filename);
+    } else if(opts.encrypt) {
         htc_zip_write_header(out, &header);
         if(!htc_aes_encrypt(in, out, key, iv, header.chunks, progress_update)) {
             fprintf(stderr, "failed to encrypt zip file!\n");
@@ -267,7 +298,7 @@ static int process_zip(FILE *in, int length, const char *filename)
 
         printf("Encrypted RUU (zip) written to: %s\n", filename);
     } else {
-        if(!htc_aes_decrypt(in, length, out, key, iv, header.chunks, 
+        if(!htc_aes_decrypt(in, length, out, key, iv, header.chunks,
                             progress_update)) {
             fprintf(stderr, "failed to decrypt zip file!\n");
             FAIL(-7)
@@ -309,16 +340,16 @@ int main(int argc, char * const *argv)
         perror("failed to open source zip");
         FAIL(-2)
     }
-    
+
     /* Check for a "Large Zip" */
     if(!opts.encrypt && htc_largezip_read_header(in, &hdr)) {
-        printf("Large zip format detected containing %d zipfile(s)\n", 
+        printf("Large zip format detected containing %d zipfile(s)\n",
                hdr.count);
-        
+
         if((name = calloc(strlen(opts.dest) + 3, sizeof(char))) == NULL) {
-            FAIL(-8) 
+            FAIL(-8)
         };
-        
+
         for(i=0; i<hdr.count;i++) {
             sprintf(name, "%02d_", i + 1);
             strcat(name, opts.dest);
