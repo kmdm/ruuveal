@@ -65,8 +65,7 @@ int htc_aes_encrypt_chunk(char *buf, int size, char *key, char *iv)
     AES_KEY enc_key;
 
     AES_set_encrypt_key(key, 8*HTC_AES_KEYSIZE, &enc_key);
-    AES_cbc_encrypt(buf, buf, size, &enc_key, iv, AES_DECRYPT);
-    //    memcpy(iv, &buf[size - HTC_AES_KEYSIZE], HTC_AES_KEYSIZE);
+    AES_cbc_encrypt(buf, buf, size, &enc_key, iv, AES_ENCRYPT);
 }
 
 static int htc_aes_crypt(FILE *in, unsigned int maxlen,
