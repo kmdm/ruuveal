@@ -89,14 +89,6 @@ static int process_zip(FILE *in, FILE *hb, const char *keyfile)
 
     FILE *out = NULL;
     htc_zip_header_t header;
-    MCRYPT td = NULL;
-    
-    /* Open encryption module. */
-    td = mcrypt_module_open(MCRYPT_RIJNDAEL_128, NULL, MCRYPT_CBC, NULL);
-    if(td == MCRYPT_FAILED) {
-        perror("failed to open mcrypt module");
-        FAIL(-8);
-    }
             
     /* Open the output file. */
     if((out = fopen(keyfile, "wb")) == NULL) {
@@ -160,7 +152,7 @@ static int process_zip(FILE *in, FILE *hb, const char *keyfile)
         
         /* Reset the chunk data and decrypt the chunk. */
         memcpy(spool, chunk, chunksize);
-        htc_aes_decrypt_chunk(td, spool, chunksize, key, iv);
+        htc_aes_decrypt_chunk(spool, chunksize, key, iv);
         
 
         /* Check for the PK zip header. */
@@ -179,7 +171,6 @@ end:
     if(chunk) free(chunk);
     if(spool) free(spool);
     if(hboot) free(hboot);
-    if(td) mcrypt_module_close(td);
     if(out) fclose(out);
     return rc;
 }

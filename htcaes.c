@@ -17,12 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with ruuveal.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <mcrypt.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <openssl/aes.h>
 #include "htcaes.h"
 
 unsigned int htc_get_num_chunks(unsigned int size, unsigned int chunk_size)
@@ -53,22 +52,21 @@ unsigned int htc_get_chunk_size(unsigned char chunks)
     return ((int)chunks)<<HTC_AES_CHUNK_SIZE;
 }
 
-int htc_aes_decrypt_chunk(MCRYPT td, char *buf, int size, char *key, char *iv)
+int htc_aes_decrypt_chunk(char *buf, int size, char *key, char *iv)
 {
-    char new_iv[HTC_AES_KEYSIZE];
-    memcpy(new_iv, &buf[size - HTC_AES_KEYSIZE], HTC_AES_KEYSIZE);
-    mcrypt_generic_init(td, key, HTC_AES_KEYSIZE, iv);
-    mdecrypt_generic(td, buf, size);
-    mcrypt_generic_deinit(td);
-    memcpy(iv, new_iv, HTC_AES_KEYSIZE);
+    AES_KEY dec_key;
+
+    AES_set_decrypt_key(key, 8*HTC_AES_KEYSIZE, &dec_key);
+    AES_cbc_encrypt(buf, buf, size, &dec_key, iv, AES_DECRYPT);
 }
 
-int htc_aes_encrypt_chunk(MCRYPT td, char *buf, int size, char *key, char *iv)
+int htc_aes_encrypt_chunk(char *buf, int size, char *key, char *iv)
 {
-    mcrypt_generic_init(td, key, HTC_AES_KEYSIZE, iv);
-    mcrypt_generic(td, buf, size);
-    mcrypt_generic_deinit(td);
-    memcpy(iv, &buf[size - HTC_AES_KEYSIZE], HTC_AES_KEYSIZE);
+    AES_KEY enc_key;
+
+    AES_set_encrypt_key(key, 8*HTC_AES_KEYSIZE, &enc_key);
+    AES_cbc_encrypt(buf, buf, size, &enc_key, iv, AES_DECRYPT);
+    //    memcpy(iv, &buf[size - HTC_AES_KEYSIZE], HTC_AES_KEYSIZE);
 }
 
 static int htc_aes_crypt(FILE *in, unsigned int maxlen,
@@ -80,7 +78,6 @@ static int htc_aes_crypt(FILE *in, unsigned int maxlen,
     unsigned int pos, size, chunks, bytes, bytesdone = 0, chunksdone = 0;
     unsigned int count = HTC_AES_READBUF_ROUNDS + 1;
     unsigned int chunk_size = htc_get_chunk_size(chunks_in);
-    MCRYPT td;
 
     /* Get size of zip data. */
     pos = ftell(in);
@@ -93,13 +90,6 @@ static int htc_aes_crypt(FILE *in, unsigned int maxlen,
     }
 
     chunks = htc_get_num_chunks(size, chunk_size);
-
-    td = mcrypt_module_open(MCRYPT_RIJNDAEL_128, NULL, MCRYPT_CBC, NULL);
-
-    if(td == MCRYPT_FAILED) {
-        perror("failed to open mcrypt module");
-        return 0;
-    }
 
     memcpy(orig_iv, iv, HTC_AES_KEYSIZE);
 
@@ -115,7 +105,7 @@ static int htc_aes_crypt(FILE *in, unsigned int maxlen,
             }
 
             if(count < HTC_AES_READBUF_ROUNDS) {
-                crypt_func(td, buf, bytes, key, iv);
+                crypt_func(buf, bytes, key, iv);
                 count++;
             } else if(count == HTC_AES_READBUF_ROUNDS) {
                 chunksdone++;
@@ -126,13 +116,11 @@ static int htc_aes_crypt(FILE *in, unsigned int maxlen,
 
         if(callback) {
             if(!callback(bytesdone, size, buf, bytes)) {
-                mcrypt_module_close(td);
                 return 0;
             }
         }
     }
 
-    mcrypt_module_close(td);
     return 1;
 }
 
