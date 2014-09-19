@@ -24,7 +24,7 @@
 #include <openssl/aes.h>
 #include "htcaes.h"
 
-unsigned int htc_get_num_chunks(unsigned int size, unsigned int chunk_size)
+unsigned int htc_aes_get_num_chunks(unsigned int size, unsigned int chunk_size)
 {
     /* FIXME: This implementation could very well not be complete. */
     unsigned int chunks;
@@ -47,7 +47,7 @@ unsigned int htc_get_num_chunks(unsigned int size, unsigned int chunk_size)
     return chunks;
 }
 
-unsigned int htc_get_chunk_size(unsigned char chunks)
+unsigned int htc_aes_get_chunk_size(unsigned char chunks)
 {
     return ((int)chunks)<<HTC_AES_CHUNK_SIZE;
 }
@@ -76,7 +76,7 @@ static int htc_aes_crypt(FILE *in, unsigned int maxlen,
     char buf[HTC_AES_READBUF], orig_iv[HTC_AES_KEYSIZE];
     unsigned int pos, size, chunks, bytes, bytesdone = 0, chunksdone = 0;
     unsigned int count = HTC_AES_READBUF_ROUNDS + 1;
-    unsigned int chunk_size = htc_get_chunk_size(chunks_in);
+    unsigned int chunk_size = htc_aes_get_chunk_size(chunks_in);
 
     /* Get size of zip data. */
     pos = ftell(in);
@@ -88,7 +88,7 @@ static int htc_aes_crypt(FILE *in, unsigned int maxlen,
         size = maxlen;
     }
 
-    chunks = htc_get_num_chunks(size, chunk_size);
+    chunks = htc_aes_get_num_chunks(size, chunk_size);
 
     memcpy(orig_iv, iv, HTC_AES_KEYSIZE);
 
@@ -126,13 +126,15 @@ static int htc_aes_crypt(FILE *in, unsigned int maxlen,
 int htc_aes_decrypt(FILE *in, unsigned int maxlen, FILE *out, char *key,
                     char *iv, unsigned char chunks, htc_aes_progress_t callback)
 {
-    return htc_aes_crypt(in,maxlen,out,key,iv,chunks,callback,htc_aes_decrypt_chunk);
+    return htc_aes_crypt(in,maxlen,out,key,iv,chunks,callback,
+                         htc_aes_decrypt_chunk);
 }
 
 int htc_aes_encrypt(FILE *in, FILE *out, char *key, char *iv,
                    unsigned char chunks, htc_aes_progress_t callback)
 {
-    return htc_aes_crypt(in, -1, out, key, iv, chunks, callback, htc_aes_encrypt_chunk);
+    return htc_aes_crypt(in, -1, out, key, iv, chunks, callback, 
+                         htc_aes_encrypt_chunk);
 }
 
 

@@ -17,6 +17,7 @@ libtool
 ltmain.sh
 missing
 ruuveal
+bruutveal
 ruuveal*tar.gz
 *.o
 *.sw?
