@@ -33,17 +33,19 @@
 #include "htczip.h"
 
 typedef struct {
-    int current;
+    char result;
+    char mode;
     unsigned int size;
-    unsigned int step;
-    int mode;
-    int result;
     char *hboot;
     char chunk[HTC_AES_KEYSIZE];
     int keymap_index;
-    #ifdef HAVE_PTHREAD_H
-    pthread_mutex_t *mutex;
-    #endif
+} shared_work_t;
+
+typedef struct {
+    int start;
+    int stop;
+    unsigned int step;
+    shared_work_t *shared;
 } work_t;
 
 #ifdef DEBUG_ENABLED
@@ -159,76 +161,63 @@ static int try_aes_keydata(char *keydata, int keymap_index, char *chunk)
 
 }
 
-static int get_next_position(work_t *work)
-{
-    int pos = 0;
-
-    #ifdef HAVE_PTHREAD_H
-    pthread_mutex_lock(work->mutex);
-    #endif
-    
-    if(work->result == -1) {
-        work->current -= work->step;
-        DEBUG(debug("WC becomes: %d, WC size: %d\n", work->current, work->size));
-        if(work->current < 0) {
-            work->current = work->size;
-            DEBUG(debug("WC reset: %d\n", work->current));
-
-            switch(++work->mode) {
-                case 1: // 2-byte aligned
-                    work->current += 2;
-                case 0: // 4-byte aligned
-                    work->current -= (work->size % 4);
-                    work->step = 4;
-                    break;
-                case 2: // no alignment
-                    work->current -= (work->size % 2);
-                    work->current++;
-                    work->step = 2;
-                    break;
-                default: // we're done
-                    work->result = -2;
-                    pos = -1;
-            }
-
-            DEBUG(debug("pos: %d, wc: %d, m: %d, s: %d, sz: %d\n\n", 
-                  pos, work->current, work->mode, work->step, work->size));
-
-        }
-
-        if(pos != -1) {
-            pos = work->current;
-        }
-    } else {
-        // abort if result found
-        pos = -1;
-    }
-
-
-    #ifdef HAVE_PTHREAD_H
-    pthread_mutex_unlock(work->mutex);
-    #endif
-
-    return pos;
-}
-
-static void do_work(void *ptr)
+static void *do_work(void *ptr)
 {
     int i = 0;
     work_t *work = (work_t *)ptr;
-     
-    while((i = get_next_position(work)) != -1) {
+    
+    for(i = work->start; 
+        i >= work->stop && work->shared->result < 0; 
+        i -= work->step
+    ) {
         printf("\rBrute-forcing key[loop %d]: %d/%d...\r",
-               work->mode + 1, i, work->size);
+               work->shared->mode + 1, i, work->shared->size);
 
         /* Generate AES/IV for decryption. */
-        if(try_aes_keydata(&work->hboot[i],
-                           work->keymap_index, work->chunk) == 1) {
-            // FIXME: No mutex lock
-            work->result = i;
+        if(try_aes_keydata(
+            &work->shared->hboot[i],work->shared->keymap_index, work->shared->chunk
+        ) == 1) {
+            work->shared->result = i;
             printf("SUCCESS!\n");
             break;
         }
+    }
+}
+
+static void configure_work(shared_work_t *shared, work_t *work, int threads)
+{
+    int i;
+    unsigned int chunksize = shared->size / threads;
+        
+    DEBUG(debug("work ptr: %p\n", work);)
+    
+    for(i = 0; i < threads; i++) {
+        work[i].shared = shared;
+        work[i].start = shared->size - (i * chunksize);
+        work[i].stop  = work[i].start - chunksize;
+        // DEBUG(debug("Prework[%d]: start=%d, stop=%d\n", i, work[i].start, work[i].stop);)
+
+        switch(shared->mode) {
+            case 1: // 2-byte aligned
+                work[i].start += 2;
+                work[i].stop += 2;
+            case 0: // 4-byte aligned
+                work[i].start -= (shared->size % 4);
+                work[i].stop -= (shared->size % 4);
+                work[i].step = 4;
+                break;
+            case 2: // no alignment
+                work[i].stop -= (shared->size % 2);
+                work[i].start -= (shared->size % 2);
+                work[i].stop--;
+                work[i].start--;
+                work[i].step = 2;
+                break;
+        
+        }
+        
+        if(work[i].stop < 0) work[i].stop = 0;
+        DEBUG(debug("Work[%d]: start=%d, stop=%d, step=%d\n", i, work[i].start, work[i].stop, work[i].step);)
     }
 }
 
@@ -239,8 +228,11 @@ static int process_zip(FILE *in, FILE *hb, const char *keyfile, int threads)
 
     FILE *out = NULL;
     htc_zip_header_t header;
-    work_t work;
+    shared_work_t shared_work;
+    work_t *thread_work;
     
+    thread_work = (work_t *)malloc(sizeof(work_t) * threads);
+
     #ifdef HAVE_PTHREAD_H
     pthread_t pthreads[threads];
     #endif
@@ -251,35 +243,42 @@ static int process_zip(FILE *in, FILE *hb, const char *keyfile, int threads)
         FAIL(-1)
     }
     
-    if(prepare_buffers(in, hb, work.chunk, &work.hboot, &work.size, &header) != 0) {
+    if(prepare_buffers(
+        in, hb, shared_work.chunk, &shared_work.hboot, &shared_work.size, 
+        &header) != 0
+    ) {
         FAIL(-2)
     }
     
-    DEBUG(debug("Size: %d\n", work.size));
+    DEBUG(debug("Size: %d\n", shared_work.size));
 
     /* poor man's initialization (read "lazy"). */
-    work.current = 0;
-    work.mode = -1;
-    work.step = 1;
-    work.result = -1;
-    work.keymap_index = header.keymap_index;
-    
-    #ifdef HAVE_PTHREAD_H
-    work.mutex = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t));
-    pthread_mutex_init(work.mutex, NULL);
-    for(t=0; t < threads; t++) {
-        pthread_create(&pthreads[t], NULL, &do_work, (void *)&work);
-    }
-    for(t=0; t < threads; t++) {
-        pthread_join(pthreads[t], NULL);
-    }
-    pthread_mutex_destroy(work.mutex);
-    #else
-    do_work(&work);
-    #endif
+    shared_work.mode = -1;
+    shared_work.result = -1;
+    shared_work.keymap_index = header.keymap_index;
 
-    if(work.result > -1) {
-        if(fwrite(&work.hboot[work.result], 1, HTC_KEYDATA_LEN, out) != 
+    while(++shared_work.mode < 3 && shared_work.result < 0) {
+        DEBUG(debug("thread_work ptr: %p\n", thread_work);)
+        configure_work(&shared_work, thread_work, threads);
+
+        #ifdef HAVE_PTHREAD_H
+        for(t=0; t < threads; t++) {
+            pthread_create(
+                &pthreads[t], NULL, &do_work, 
+                (void *)&thread_work[t]
+            );
+        }
+        for(t=0; t < threads; t++) {
+            pthread_join(pthreads[t], NULL);
+        }
+        #else
+        do_work(&thread_work[0]);
+        #endif
+    }
+
+
+    if(shared_work.result > -1) {
+        if(fwrite(&shared_work.hboot[shared_work.result], 1, HTC_KEYDATA_LEN, out) != 
                   HTC_KEYDATA_LEN) {
             perror("failed to write key data to file");
             FAIL(-3);
@@ -290,7 +289,7 @@ static int process_zip(FILE *in, FILE *hb, const char *keyfile, int threads)
     }
 
 end:
-    if(work.hboot) free(work.hboot);
+    if(shared_work.hboot) free(shared_work.hboot);
     if(out) fclose(out);
     return rc;
 }
@@ -331,7 +330,7 @@ int main(int argc, char * const *argv)
         fseek(in, sizeof(hdr) + hdr.starts[0], SEEK_SET);
     }
         
-    rc = process_zip(in, hb, argv[3], 1);
+    rc = process_zip(in, hb, argv[3], 8);
     
     switch(rc) {
         case 0: 
