@@ -33,7 +33,7 @@
 #include "htczip.h"
 
 typedef struct {
-    char result;
+    int result;
     char mode;
     unsigned int size;
     char *hboot;
