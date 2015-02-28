@@ -228,7 +228,7 @@ static int process_zip(FILE *in, FILE *hb, const char *keyfile, int threads)
 
     FILE *out = NULL;
     htc_zip_header_t header;
-    shared_work_t shared_work;
+    shared_work_t shared_work = {0};
     work_t *thread_work;
     
     thread_work = (work_t *)malloc(sizeof(work_t) * threads);
