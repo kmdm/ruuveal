@@ -208,7 +208,7 @@ static int process_zip(FILE *in, int length, const char *filename)
     htc_zip_header_t header;
 
     /* Read the header. */
-    if(!opts.encrypt) {
+    if(!opts.encrypt && !opts.dump) {
         if(!htc_zip_read_header(in, &header)) {
             fseek(in, 0x100, SEEK_CUR);
             if(!htc_zip_read_header(in, &header)) {
