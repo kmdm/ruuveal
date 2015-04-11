@@ -1,11 +1,20 @@
 #ifndef HTC_AES_H
 #define HTC_AES_H
-#include <mcrypt.h>
-typedef void (*htc_aes_progress_t) (unsigned int, unsigned int);
-typedef int (*htc_aes_crypt_t) (MCRYPT, char *, int, char *, char *);
-int htc_aes_decrypt(FILE *, unsigned int, FILE *, char *, char *, unsigned char, 
+#include <openssl/aes.h>
+
+typedef int (*htc_aes_progress_t) (unsigned int, unsigned int, const char *, unsigned int);
+typedef int (*htc_aes_crypt_t) (char *, int, char *, char *);
+
+
+unsigned int htc_aes_get_num_chunks(unsigned int, unsigned int);
+unsigned int htc_aes_get_chunk_size(unsigned char);
+
+int htc_aes_decrypt_chunk(char *, int, char *, char *);
+int htc_aes_encrypt_chunk(char *, int, char *, char *);
+
+int htc_aes_decrypt(FILE *, unsigned int, FILE *, char *, char *, unsigned char,
                     htc_aes_progress_t);
-int htc_aes_encrypt(FILE *, FILE *, char *, char *, unsigned char, 
+int htc_aes_encrypt(FILE *, FILE *, char *, char *, unsigned char,
                     htc_aes_progress_t);
 
 #define HTC_AES_KEYSIZE 0x10
