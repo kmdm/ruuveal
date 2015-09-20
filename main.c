@@ -346,7 +346,7 @@ int main(int argc, char * const *argv)
         printf("Large zip format detected containing %d zipfile(s)\n",
                hdr.count);
 
-        if((name = calloc(strlen(opts.dest) + 3, sizeof(char))) == NULL) {
+        if((name = calloc(strlen(opts.dest) + 4, sizeof(char))) == NULL) {
             FAIL(-8)
         };
 
